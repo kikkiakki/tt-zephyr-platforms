@@ -1,0 +1,18 @@
+# Copyright(c) 2022 Chromium OS Authors
+# Copyright(c) 2025 Tenstorrent AI ULC
+# SPDX-License-Identifier: Apache-2.0
+
+menuconfig GPIO_TCA6554A
+    bool "TCA6554A driver"
+    default y
+    depends on DT_HAS_TI_TCA6554A_ENABLED
+    depends on I2C
+    help
+        Enable driver for TCA6554A IO expander chip.
+
+config GPIO_TCA6554A_INIT_PRIORITY
+    int "Init priority"
+    default 70
+    depends on GPIO_TCA6554A
+    help
+        Device driver initialization priority.

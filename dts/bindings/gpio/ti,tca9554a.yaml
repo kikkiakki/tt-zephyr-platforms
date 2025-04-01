@@ -1,0 +1,24 @@
+# Copyright (c) 2022 Chromium OS Authors
+# Copyright (c) 2025 Tenstorrent AI ULC
+# SPDX-License-Identifier: Apache-2.0
+ 
+description: TI TCA9554A I2C-based GPIO expander
+
+compatible: "ti,tca9554a"
+
+include: [gpio-controller.yaml, i2c-device.yaml]
+
+properties:
+    int-gpios:
+      type: phandle-array
+      required: false
+      description: |
+          GPIO connected to the controller INT pin. This pin is active-low
+          and open-drain.
+
+    "#gpio-cells":
+      const: 2
+
+gpio-cells:
+  - pin
+  - flags
