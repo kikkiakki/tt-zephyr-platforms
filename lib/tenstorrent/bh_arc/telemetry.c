@@ -4,9 +4,11 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include "bm2cm_msg.h"
 #include "cm2bm_msg.h"
 #include "fan_ctrl.h"
 #include "fw_table.h"
+#include "gddr.h"
 #include "harvesting.h"
 #include "pll.h"
 #include "pvt.h"
@@ -16,7 +18,6 @@
 #include "status_reg.h"
 #include "telemetry.h"
 #include "telemetry_internal.h"
-#include "gddr.h"
 
 #include <float.h> /* for FLT_MAX */
 #include <math.h>  /* for floor */

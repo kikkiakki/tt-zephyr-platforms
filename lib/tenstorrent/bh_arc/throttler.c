@@ -7,7 +7,7 @@
 #include <zephyr/sys/util.h>
 #include "throttler.h"
 #include "aiclk_ppm.h"
-#include "cm2bm_msg.h"
+#include "bm2cm_msg.h"
 #include "fw_table.h"
 #include "telemetry_internal.h"
 #include "telemetry.h"
@@ -179,17 +179,4 @@ void CalculateThrottlers(void)
 	for (ThrottlerId i = 0; i < kThrottlerCount; i++) {
 		UpdateThrottlerArb(i);
 	}
-}
-
-int32_t Bm2CmSetBoardPwrLimit(const uint8_t *data, uint8_t size)
-{
-	if (size != 2) {
-		return -1;
-	}
-
-	uint16_t pwr_limit = *(uint16_t *)data;
-
-	SetThrottlerLimit(kThrottlerBoardPwr, pwr_limit);
-
-	return 0;
 }

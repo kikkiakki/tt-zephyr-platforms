@@ -32,7 +32,6 @@ static struct k_timer fan_ctrl_update_timer;
 static struct k_work fan_ctrl_update_worker;
 static int fan_ctrl_update_interval = 1000;
 
-uint16_t fan_rpm; /* Fan RPM from tach */
 uint32_t fan_speed; /* In PWM for now */
 float max_gddr_temp;
 float max_asic_temp;
@@ -109,16 +108,6 @@ static void update_fan_speed(void)
 	fan_speed = fan_curve(max_asic_temp, max_gddr_temp);
 
 	UpdateFanSpeedRequest(fan_speed);
-}
-
-uint16_t GetFanRPM(void)
-{
-	return fan_rpm;
-}
-
-void SetFanRPM(uint16_t rpm)
-{
-	fan_rpm = rpm;
 }
 
 uint32_t GetFanSpeed(void)

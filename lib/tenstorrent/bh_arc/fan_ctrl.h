@@ -10,7 +10,5 @@
 
 void init_fan_ctrl(void);
 uint32_t GetFanSpeed(void);
-uint16_t GetFanRPM(void);
-void SetFanRPM(uint16_t rpm);
 
 #endif

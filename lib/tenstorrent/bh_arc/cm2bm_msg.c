@@ -15,9 +15,9 @@
 #include <tenstorrent/msg_type.h>
 #include <tenstorrent/msgqueue.h>
 
+#include "bm2cm_msg.h"
 #include "cm2bm_msg.h"
 #include "asic_state.h"
-#include "fan_ctrl.h"
 #include "telemetry.h"
 
 typedef struct {
@@ -27,8 +27,6 @@ typedef struct {
 } Cm2BmMsgState;
 
 static Cm2BmMsgState cm2bm_msg_state;
-static bool bmfw_ping_valid;
-static int32_t current;
 K_MSGQ_DEFINE(cm2bm_msg_q, sizeof(Cm2BmMsg), 4, _Alignof(Cm2BmMsg));
 
 int32_t EnqueueCm2BmMsg(const Cm2BmMsg *msg)
@@ -176,80 +174,14 @@ static uint8_t ping_bm_handler(uint32_t msg_code, const struct request *request,
 		.msg_id = kCm2BmMsgIdPing,
 	};
 
-	bmfw_ping_valid = false;
+	SetBmfwPingValid(false);
 	EnqueueCm2BmMsg(&msg);
 	/* Delay to allow BMFW to respond */
 	k_msleep(50);
 
 	/* Encode response from BMFW */
-	response->data[1] = bmfw_ping_valid;
+	response->data[1] = GetBmfwPingValid();
 	return 0;
 }
 
 REGISTER_MESSAGE(MSG_TYPE_PING_BM, ping_bm_handler);
-
-int32_t Bm2CmSendDataHandler(const uint8_t *data, uint8_t size)
-{
-#ifndef CONFIG_TT_SMC_RECOVERY
-	if (size != sizeof(bmStaticInfo)) {
-		return -1;
-	}
-
-	bmStaticInfo *info = (bmStaticInfo *)data;
-
-	if (info->version != 0) {
-		UpdateBmFwVersion(info->bl_version, info->app_version);
-		return 0;
-	}
-#endif
-
-	return -1;
-}
-
-int32_t Bm2CmPingHandler(const uint8_t *data, uint8_t size)
-{
-	if (size != 2) {
-		return -1;
-	}
-
-	uint16_t response = *(uint16_t *)data;
-
-	if (response != 0xA5A5) {
-		bmfw_ping_valid = false;
-		return -1;
-	}
-	bmfw_ping_valid = true;
-	return 0;
-}
-
-int32_t Bm2CmSendCurrentHandler(const uint8_t *data, uint8_t size)
-{
-	if (size != 4) {
-		return -1;
-	}
-
-	current = *(int32_t *)data;
-
-	return 0;
-}
-
-/* TODO: Put these somewhere else? */
-int32_t GetInputCurrent(void)
-{
-	return current;
-}
-
-int32_t Bm2CmSendFanRPMHandler(const uint8_t *data, uint8_t size)
-{
-#ifndef CONFIG_TT_SMC_RECOVERY
-	if (size != 2) {
-		return -1;
-	}
-
-	SetFanRPM(*(uint16_t *)data);
-
-	return 0;
-#endif
-
-	return -1;
-}

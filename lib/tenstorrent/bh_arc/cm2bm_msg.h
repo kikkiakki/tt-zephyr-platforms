@@ -40,18 +40,4 @@ int32_t ResetBoardByte(uint8_t *data, uint8_t size);
 void ChipResetRequest(void *arg);
 void UpdateFanSpeedRequest(uint32_t fan_speed);
 
-typedef struct bmStaticInfo {
-	/* Non-zero for valid data */
-	/* Allows for breaking changes */
-	uint32_t version;
-	uint32_t bl_version;
-	uint32_t app_version;
-} __packed bmStaticInfo;
-
-int32_t Bm2CmSendDataHandler(const uint8_t *data, uint8_t size);
-int32_t Bm2CmPingHandler(const uint8_t *data, uint8_t size);
-int32_t Bm2CmSendCurrentHandler(const uint8_t *data, uint8_t size);
-int32_t GetInputCurrent(void);
-int32_t Bm2CmSendFanRPMHandler(const uint8_t *data, uint8_t size);
-
 #endif

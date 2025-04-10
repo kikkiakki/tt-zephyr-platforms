@@ -39,6 +39,7 @@ zephyr_library_sources(
   arc_dma.c
   avs.c
   cat.c
+  bm2cm_msg.c
   cm2bm_msg.c
   dw_apb_i2c.c
   gpio.c

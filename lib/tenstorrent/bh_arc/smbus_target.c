@@ -7,8 +7,8 @@
 #include "reg.h"
 #include "status_reg.h"
 #include "dw_apb_i2c.h"
+#include "bm2cm_msg.h"
 #include "cm2bm_msg.h"
-#include "throttler.h"
 
 #include <stdint.h>
 
@@ -192,13 +192,11 @@ static SmbusConfig smbus_config = {
 			.handler = {
 				.rcv_handler = &Bm2CmSendFanRPMHandler
 			}},
-#ifndef CONFIG_TT_SMC_RECOVERY
 		[0x24] = {.valid = 1,
 			  .trans_type = kSmbusTransWriteWord,
 			  .handler = {
-					  .rcv_handler = &Bm2CmSetBoardPwrLimit
+					  .rcv_handler = &Bm2CmSendBoardPwrLimHandler
 			  }},
-#endif
 		[0xD8] = {
 
 				.valid = 1,
