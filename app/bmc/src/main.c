@@ -133,31 +133,32 @@ void ina228_current_update(void)
 	}
 }
 
-uint16_t detect_max_pwr(void)
+uint16_t detect_max_board_pwr(void)
+{
+	static const struct gpio_dt_spec board_id0 =
+		GPIO_DT_SPEC_GET_OR(DT_PATH(board_id0), gpios, {0});
+
+	gpio_pin_configure_dt(&board_id0, GPIO_INPUT);
+
+	int board_id0_val = gpio_pin_get_dt(&board_id0);
+
+	return board_id0_val ? 450 : 300;
+}
+
+uint16_t detect_max_psu_pwr(void)
 {
 	static const struct gpio_dt_spec psu_sense0 =
 		GPIO_DT_SPEC_GET_OR(DT_PATH(psu_sense0), gpios, {0});
 	static const struct gpio_dt_spec psu_sense1 =
 		GPIO_DT_SPEC_GET_OR(DT_PATH(psu_sense1), gpios, {0});
-	static const struct gpio_dt_spec board_id0 =
-		GPIO_DT_SPEC_GET_OR(DT_PATH(board_id0), gpios, {0});
 
 	gpio_pin_configure_dt(&psu_sense0, GPIO_INPUT);
 	gpio_pin_configure_dt(&psu_sense1, GPIO_INPUT);
-	gpio_pin_configure_dt(&board_id0, GPIO_INPUT);
 
 	int sense0_val = gpio_pin_get_dt(&psu_sense0);
 	int sense1_val = gpio_pin_get_dt(&psu_sense1);
-	int board_id0_val = gpio_pin_get_dt(&board_id0);
 
-	uint16_t board_pwr;
 	uint16_t psu_pwr;
-
-	if (board_id0_val) {
-		board_pwr = 450;
-	} else {
-		board_pwr = 300;
-	}
 
 	if (!sense0_val && !sense1_val) {
 		psu_pwr = 600;
@@ -177,7 +178,15 @@ uint16_t detect_max_pwr(void)
 		}
 	}
 
-	return MIN(board_pwr, psu_pwr);
+	return psu_pwr;
+}
+
+void board_power_off(void)
+{
+	static const struct gpio_dt_spec power_on_mcu =
+		GPIO_DT_SPEC_GET_OR(DT_PATH(power_on_mcu), gpios, {0});
+
+	gpio_pin_configure_dt(&power_on_mcu, GPIO_OUTPUT_LOW);
 }
 
 int main(void)
@@ -311,9 +320,14 @@ int main(void)
 					chip->data.arc_just_reset = false;
 				}
 				/* TODO: we don't have to read this per chip */
-				uint16_t max_pwr = detect_max_pwr();
+				uint16_t max_psu_pwr = detect_max_psu_pwr();
+				uint16_t max_board_pwr = detect_max_board_pwr();
 
-				bh_chip_set_board_pwr_lim(chip, max_pwr);
+				if (max_psu_pwr < max_board_pwr) {
+					board_power_off();
+				}
+
+				bh_chip_set_board_pwr_lim(chip, max_board_pwr);
 			}
 		}
 
