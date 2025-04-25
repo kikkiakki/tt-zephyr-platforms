@@ -142,7 +142,7 @@ uint16_t detect_max_board_pwr(void)
 
 	int board_id0_val = gpio_pin_get_dt(&board_id0);
 
-	return board_id0_val ? 450 : 300;
+	return board_id0_val ? 430 : 280;
 }
 
 uint16_t detect_max_psu_pwr(void)
