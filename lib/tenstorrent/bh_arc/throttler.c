@@ -197,16 +197,7 @@ void CalculateThrottlers(void)
 	}
 }
 
-int32_t Bm2CmSetBoardPwrLimit(const uint8_t *data, uint8_t size)
+void SetBoardPowerLimit(uint16_t pwr_limit)
 {
-	if (size != 2) {
-		return -1;
-	}
-
-	uint16_t pwr_limit = *(uint16_t *)data;
-
 	SetThrottlerLimit(kThrottlerBoardPwr, pwr_limit);
-	UpdateTelemetryBoardPwrLimit(pwr_limit);
-
-	return 0;
 }

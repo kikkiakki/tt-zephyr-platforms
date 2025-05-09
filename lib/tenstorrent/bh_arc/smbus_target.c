@@ -8,7 +8,6 @@
 #include "status_reg.h"
 #include "dw_apb_i2c.h"
 #include "cm2bm_msg.h"
-#include "throttler.h"
 
 #include <stdint.h>
 

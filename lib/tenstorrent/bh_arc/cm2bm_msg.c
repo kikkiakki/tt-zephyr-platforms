@@ -19,6 +19,7 @@
 #include "asic_state.h"
 #include "fan_ctrl.h"
 #include "telemetry.h"
+#include "throttler.h"
 
 typedef struct {
 	uint8_t curr_msg_valid;
@@ -27,8 +28,10 @@ typedef struct {
 } Cm2BmMsgState;
 
 static Cm2BmMsgState cm2bm_msg_state;
+static bool smc_ready_for_msgs;
 static bool bmfw_ping_valid;
 static int32_t current;
+
 K_MSGQ_DEFINE(cm2bm_msg_q, sizeof(Cm2BmMsg), 4, _Alignof(Cm2BmMsg));
 
 int32_t EnqueueCm2BmMsg(const Cm2BmMsg *msg)
@@ -191,7 +194,7 @@ REGISTER_MESSAGE(MSG_TYPE_PING_BM, ping_bm_handler);
 int32_t Bm2CmSendDataHandler(const uint8_t *data, uint8_t size)
 {
 #ifndef CONFIG_TT_SMC_RECOVERY
-	if (size != sizeof(bmStaticInfo)) {
+	if (size != sizeof(bmStaticInfo) || !smc_ready_for_msgs) {
 		return -1;
 	}
 
@@ -252,4 +255,23 @@ int32_t Bm2CmSendFanRPMHandler(const uint8_t *data, uint8_t size)
 #endif
 
 	return -1;
+}
+
+int32_t Bm2CmSetBoardPwrLimit(const uint8_t *data, uint8_t size)
+{
+	if (size != 2 || !smc_ready_for_msgs) {
+		return -1;
+	}
+
+	uint16_t pwr_limit = *(uint16_t *)data;
+
+	SetBoardPowerLimit(pwr_limit);
+	UpdateTelemetryBoardPwrLimit(pwr_limit);
+
+	return 0;
+}
+
+void SetSmcReadyForMsgs(void)
+{
+	smc_ready_for_msgs = true;
 }
