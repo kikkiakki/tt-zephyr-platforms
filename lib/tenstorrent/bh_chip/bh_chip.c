@@ -242,4 +242,5 @@ void handle_pgood_event(struct bh_chip *chip, struct gpio_dt_spec board_fault_le
 		}
 		chip->data.pgood_rise_triggered = false;
 	}
+
 }
